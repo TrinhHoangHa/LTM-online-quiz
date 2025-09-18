@@ -4,7 +4,7 @@
     </a>
 </h2>
 <h2 align="center">
-   GAME TIC TAC TOE (CARO 3x3) MULTIPLAYER
+   ỨNG DỤNG TRẮC NHIỆM TRỰC TUYẾN
 </h2>
 <div align="center">
     <p align="center">
