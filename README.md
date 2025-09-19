@@ -45,7 +45,7 @@ Hệ thống **Trắc nghiệm trực tuyến** được phát triển theo mô 
     - Nhập username/password, kiểm tra regex (username: 3-20 ký tự chữ cái/số/underscore; password: ít nhất 6 ký tự với chữ hoa/thường/số/ký tự đặc biệt).
 
 <p align="center">
-  <img src="assets/dangnhap.png" alt="Màn hình đăng nhập" width="400"/>
+  <img src="docs/dangnhap.png" alt="Màn hình đăng nhập" width="400"/>
 </p>
 <p align="center">
   <em> Hình 1: Màn hình đăng nhập (LoginFrame) </em>
