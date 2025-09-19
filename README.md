@@ -19,7 +19,7 @@
 
 </div>
 
-## 1. Giới thiệu hệ thống
+📖## 1. Giới thiệu hệ thống
 
 Hệ thống **Trắc nghiệm trực tuyến** được phát triển theo mô hình Client-Server, cho phép người dùng đăng nhập, tham gia các bài kiểm tra online, chọn đề thi và làm bài trực tiếp trên giao diện đồ họa. Kết quả làm bài sẽ được lưu trữ, hiển thị điểm số, câu đúng/sai, và thống kê điểm của từng người dùng.  
 
@@ -30,7 +30,7 @@ Hệ thống **Trắc nghiệm trực tuyến** được phát triển theo mô 
 - Nộp bài: Sau khi nộp, điểm hiển thị trên cùng, các câu đúng màu xanh, câu sai màu đỏ nhạt, nút “Nộp” đổi thành “Quay lại”.
 - Lịch sử làm bài: Lưu kết quả làm bài trong `exam_history.csv` (username, exam_id, score, timestamp), hiển thị thống kê tổng điểm và số bài đã làm.
 
-## 2. Công nghệ sử dụng
+🔧## 2. Công nghệ sử dụng
 - Ngôn ngữ lập trình: Java (JDK 8+).
 - Giao diện người dùng: Java Swing (JFrame, JButton, JLabel, JPanel, JRadioButton, JTable cho lịch sử làm bài).
 - Truyền thông mạng: TCP Socket (ServerSocket cho server, Socket cho client).
@@ -40,7 +40,7 @@ Hệ thống **Trắc nghiệm trực tuyến** được phát triển theo mô 
     - Server: `Server.java` (quản lý đề thi, gửi câu hỏi cho client, nhận đáp án và trả kết quả).
     - Thread và I/O: xử lý đồng bộ giữa client-server, lưu/truy xuất dữ liệu SQL, gửi điểm và kết quả trả về.
 
-## 3. Hình ảnh các chức năng
+🚀## 3. Hình ảnh các chức năng
 - Màn hình đăng nhập
     - Nhập username/password, kiểm tra regex (username: 3-20 ký tự chữ cái/số/underscore; password: ít nhất 6 ký tự với chữ hoa/thường/số/ký tự đặc biệt).
 
@@ -93,7 +93,7 @@ Hệ thống **Trắc nghiệm trực tuyến** được phát triển theo mô 
 </p>
 
 
-## 4. Cài đặt & chạy chương trình
+📝## 4. Cài đặt & chạy chương trình
 - Bước 1: Chuẩn bị môi trường
     - Cài đặt Eclipse IDE for Java Developers (hoặc phiên bản Eclipse hỗ trợ Java).
     - Cài đặt Java JDK 8+.
@@ -110,3 +110,4 @@ Hệ thống **Trắc nghiệm trực tuyến** được phát triển theo mô 
 - Bước 4: Làm bài kiểm tra
     - Chọn đáp án A/B/C/D.
     - Sau khi nộp: điểm hiển thị trên cùng, câu đúng/sai màu nền, nút nộp đổi thành “Quay lại”.
+👜## 5. Liên hệ
