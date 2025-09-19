@@ -56,7 +56,7 @@ Hệ thống **Trắc nghiệm trực tuyến** được phát triển theo mô 
     - Chọn đề thi, bắt đầu làm bài, xem lịch sử làm bài.
 
 <p align="center">
-  <img src="docs/menu.png" alt="Màn hình menu" width="400"/>
+  <img src="docs/menu2.png" alt="Màn hình menu" width="400"/>
 </p>
 <p align="center">
   <em> Hình 2: Menu chính (ExamMenu) </em>
@@ -120,4 +120,5 @@ Hệ thống **Trắc nghiệm trực tuyến** được phát triển theo mô 
 
 
 ---
+
 
