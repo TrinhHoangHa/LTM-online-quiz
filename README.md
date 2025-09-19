@@ -56,7 +56,7 @@ Hệ thống **Trắc nghiệm trực tuyến** được phát triển theo mô 
     - Chọn đề thi, bắt đầu làm bài, xem lịch sử làm bài.
 
 <p align="center">
-  <img src="assets/menu.png" alt="Màn hình menu" width="400"/>
+  <img src="docs/menu.png" alt="Màn hình menu" width="400"/>
 </p>
 <p align="center">
   <em> Hình 2: Menu chính (ExamMenu) </em>
@@ -66,7 +66,7 @@ Hệ thống **Trắc nghiệm trực tuyến** được phát triển theo mô 
     - Hiển thị câu hỏi, lựa chọn A/B/C/D, sidebar câu hỏi, nút nộp bài.
 
 <p align="center">
-  <img src="assets/lambai.png" alt="Màn hình làm bài" width="500"/>
+  <img src="docs/lambai.png" alt="Màn hình làm bài" width="500"/>
 </p>
 <p align="center">
   <em> Hình 3: Giao diện làm bài kiểm tra (DoExamUI) </em>
@@ -76,7 +76,7 @@ Hệ thống **Trắc nghiệm trực tuyến** được phát triển theo mô 
     - Câu đúng màu xanh, câu sai màu đỏ nhạt, điểm hiển thị trên cùng, nút nộp đổi thành “Quay lại”.
 
 <p align="center">
-  <img src="assets/kq.png" alt="Kết quả" width="500"/>
+  <img src="docs/kq.png" alt="Kết quả" width="500"/>
 </p>
 <p align="center">
   <em> Hình 4: Kết quả bài làm sau khi nộp </em>
@@ -86,7 +86,7 @@ Hệ thống **Trắc nghiệm trực tuyến** được phát triển theo mô 
     - Hiển thị thống kê số bài đã làm, điểm trung bình, chi tiết câu trả lời từng bài.
 
 <p align="center">
-  <img src="assets/lichsudau.png" alt="Lịch sử làm bài" width="500"/>
+  <img src="docs/lichsu.png" alt="Lịch sử làm bài" width="500"/>
 </p>
 <p align="center">
   <em> Hình 5: Lịch sử làm bài (ExamHistoryFrame) </em>
