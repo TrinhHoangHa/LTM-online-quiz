@@ -18,8 +18,8 @@
 [![DaiNam University](https://img.shields.io/badge/DaiNam%20University-orange?style=for-the-badge)](https://dainam.edu.vn)
 
 </div>
-
-##📖 1. Giới thiệu hệ thống
+📖
+## 1. Giới thiệu hệ thống 
 
 Hệ thống **Trắc nghiệm trực tuyến** được phát triển theo mô hình Client-Server, cho phép người dùng đăng nhập, tham gia các bài kiểm tra online, chọn đề thi và làm bài trực tiếp trên giao diện đồ họa. Kết quả làm bài sẽ được lưu trữ, hiển thị điểm số, câu đúng/sai, và thống kê điểm của từng người dùng.  
 
