@@ -4,12 +4,12 @@
     </a>
 </h2>
 <h2 align="center">
-   ỨNG DỤNG TRẮC NGHIỆM TRỰC TUYẾN
+   ỨNG DỤNG TRẮC NHIỆM TRỰC TUYẾN 
 </h2>
 <div align="center">
     <p align="center">
         <img src="docs/aiotlab_logo.png" alt="AIoTLab Logo" width="170"/>
-        <img src="docs/fitdnu_logo.png" alt="FIT DNU Logo" width="180"/>
+        <img src="docs/fitdnu_logo.png" alt="AIoTLab Logo" width="180"/>
         <img src="docs/dnu_logo.png" alt="DaiNam University Logo" width="200"/>
     </p>
 
@@ -19,95 +19,134 @@
 
 </div>
 
-## 1. Giới thiệu hệ thống 
-📖
-Hệ thống **Trắc nghiệm trực tuyến** được phát triển theo mô hình Client-Server, cho phép người dùng đăng nhập, tham gia các bài kiểm tra online, chọn đề thi và làm bài trực tiếp trên giao diện đồ họa. Kết quả làm bài sẽ được lưu trữ, hiển thị điểm số, câu đúng/sai, và thống kê điểm của từng người dùng.  
+## 📖 1. Giới thiệu
+Ứng dụng Trắc nghiệm trực tuyến Client–Server được phát triển bằng Java, dựa trên giao thức TCP để đảm bảo việc trao đổi dữ liệu tin cậy và chính xác.
+Hệ thống cho phép sinh viên/kỹ thuật viên kết nối tới server, thực hiện làm bài trắc nghiệm, và nhận kết quả ngay sau khi hoàn thành.
 
-**Chức năng chính**
-- Đăng nhập (lưu trữ trong file `users.csv` với định dạng username,password,score,exam_count).
-- Menu chính: Chọn bài thi, bắt đầu làm bài, xem lịch sử làm bài.
-- Làm bài kiểm tra: Hiển thị từng câu hỏi, các lựa chọn A/B/C/D, ghi nhận câu trả lời.
-- Nộp bài: Sau khi nộp, điểm hiển thị trên cùng, các câu đúng màu xanh, câu sai màu đỏ nhạt, nút “Nộp” đổi thành “Quay lại”.
-- Lịch sử làm bài: Lưu kết quả làm bài trong `exam_history.csv` (username, exam_id, score, timestamp), hiển thị thống kê tổng điểm và số bài đã làm.
 
-## 2. Công nghệ sử dụng🔧
-- Ngôn ngữ lập trình: Java (JDK 8+).
-- Giao diện người dùng: Java Swing (JFrame, JButton, JLabel, JPanel, JRadioButton, JTable cho lịch sử làm bài).
-- Truyền thông mạng: TCP Socket (ServerSocket cho server, Socket cho client).
-- Lưu trữ dữ liệu: MySQL.
-- Kiến trúc:
-    - Client: `LoginFrame.java`, `RegisterFrame.java`, `ExamMenu.java`, `ExamClient.java`, `DoExamUI.java`.
-    - Server: `Server.java` (quản lý đề thi, gửi câu hỏi cho client, nhận đáp án và trả kết quả).
-    - Thread và I/O: xử lý đồng bộ giữa client-server, lưu/truy xuất dữ liệu SQL, gửi điểm và kết quả trả về.
+Các chức năng chính: 
+1. Client kết nối đến server qua địa chỉ IP và port (mặc định: 5555). Server hỗ trợ nhiều client đồng thời thông qua cơ chế đa luồng, và yêu cầu người dùng nhập tên để xác định danh tính.
+2. Gửi và nhận câu hỏi – đáp án: Server gửi các câu hỏi trắc nghiệm đến client. Người dùng chọn đáp án, gửi về server; server kiểm tra và phản hồi kết quả đúng/sai theo thời gian thực.
 
-## 3. Hình ảnh các chức năng🚀
-- Màn hình đăng nhập
-    - Nhập username/password, kiểm tra regex (username: 3-20 ký tự chữ cái/số/underscore; password: ít nhất 6 ký tự với chữ hoa/thường/số/ký tự đặc biệt).
+
+## 🔧 2. Công nghệ sử dụng  
+Các công nghệ được sử dụng để xây dựng ứng dụng chat Client-Server sử dụng TCP với Java Swing:  
+
+## 🚀 3. Các project đã thực hiện
 
 <p align="center">
-  <img src="docs/dangnhap.png" alt="Màn hình đăng nhập" width="400"/>
+  <img src="docs/anhGiaoDien.jpg" alt="Ảnh 1" width="800"/>
+</p>
+
+<p align="center">
+  <em>Hình 1: Giao diện khi vào ứng dụng  </em>
+</p>
+
+<p align="center">
+  <img src="docs/giaodienkhidaketnoisever.jpg" alt="Ảnh 2" width="700"/>
 </p>
 <p align="center">
-  <em> Hình 1: Màn hình đăng nhập (LoginFrame) </em>
+  <em> Hình 2: Client sau khi kết nối sever</em>
 </p>
 
 
-- Màn hình menu chính
-    - Chọn đề thi, bắt đầu làm bài, xem lịch sử làm bài.
-
 <p align="center">
-  <img src="docs/menu.png" alt="Màn hình menu" width="400"/>
+  <img src="docs/saukhilamxong.jpg" alt="Ảnh 3" width="500"/>
+ 
 </p>
 <p align="center">
-  <em> Hình 2: Menu chính (ExamMenu) </em>
+  <em> Hình 3: Sau khi làm xong bài  </em>
 </p>
-
-- Màn hình làm bài
-    - Hiển thị câu hỏi, lựa chọn A/B/C/D, sidebar câu hỏi, nút nộp bài.
 
 <p align="center">
-  <img src="docs/lambai.png" alt="Màn hình làm bài" width="500"/>
+    <img src="docs/ketquasaukhixg.png" alt="Ảnh 4" width="450"/>
 </p>
 <p align="center">
-  <em> Hình 3: Giao diện làm bài kiểm tra (DoExamUI) </em>
+  <em> Hình 4: Kết quả sau khi lưu trữ </em>
 </p>
 
-- Sau khi nộp bài
-    - Câu đúng màu xanh, câu sai màu đỏ nhạt, điểm hiển thị trên cùng, nút nộp đổi thành “Quay lại”.
+## 📝 4. Hướng dẫn cài đặt và sử dụng
 
-<p align="center">
-  <img src="docs/kq.png" alt="Kết quả" width="500"/>
-</p>
-<p align="center">
-  <em> Hình 4: Kết quả bài làm sau khi nộp </em>
-</p>
+### 🔧 Yêu cầu hệ thống
 
-- Lịch sử làm bài
-    - Hiển thị thống kê số bài đã làm, điểm trung bình, chi tiết câu trả lời từng bài.
+- **Java Development Kit (JDK)**: Phiên bản 8 trở lên
+- **Hệ điều hành**: Windows, macOS, hoặc Linux
+- **Môi trường phát triển**: IDE (IntelliJ IDEA, Eclipse, VS Code) hoặc terminal/command prompt
+- **Bộ nhớ**: Tối thiểu 512MB RAM
+- **Dung lượng**: Khoảng 10MB cho mã nguồn và file thực thi
+- **Mạng**: Yêu cầu kết nối mạng nội bộ hoặc Internet để client và server giao tiếp qua TCP
 
-<p align="center">
-  <img src="docs/lichsu.png" alt="Lịch sử làm bài" width="500"/>
-</p>
-<p align="center">
-  <em> Hình 5: Lịch sử làm bài (ExamHistoryFrame) </em>
-</p>
+### 📦 Cài đặt và triển khai
 
+#### Bước 1: Chuẩn bị môi trường
 
-## 4. Cài đặt & chạy chương trình📝
-- Bước 1: Chuẩn bị môi trường
-    - Cài đặt Eclipse IDE for Java Developers (hoặc phiên bản Eclipse hỗ trợ Java).
-    - Cài đặt Java JDK 8+.
-    - Kiểm tra JDK bằng lệnh trong terminal: `java -version`.
-- Bước 2: Thiết lập dự án trong Eclipse
-    - Mở Eclipse, chọn **File > New > Java Project**.
-    - Đặt tên dự án (ví dụ: `OnlineQuiz`) và nhấn **Finish**.
-    - Sao chép thư mục `quiz` chứa các file mã nguồn (`LoginFrame.java`, `RegisterFrame.java`, `ExamMenu.java`, `Server.java`, `ExamClient.java`, `DoExamUI.java`) vào thư mục dự án.
-    - Nhấn chuột phải vào dự án trong **Package Explorer**, chọn **Refresh** để cập nhật các file.
-- Bước 3: Chạy chương trình
-    - Mở `LoginFrame.java` → **Run As > Java Application**.
-    - Đăng nhập tài khoản.
-    - Trong menu, chọn đề thi, bắt đầu làm bài, hoặc xem lịch sử làm bài.
-- Bước 4: Làm bài kiểm tra
-    - Chọn đáp án A/B/C/D.
-    - Sau khi nộp: điểm hiển thị trên cùng, câu đúng/sai màu nền, nút nộp đổi thành “Quay lại”.
-## 5. Liên hệ👜
+1. **Kiểm tra Java**: Mở terminal/command prompt và chạy:
+
+   ```bash
+   java -version
+   javac -version
+   ```
+   Đảm bảo cả hai lệnh đều hiển thị phiên bản Java 8 trở lên.
+
+2. **Tải mã nguồn**: Sao chép thư mục `UngDungTracNghiem_TCP` chứa các file:
+   - `QuizServer.java`
+   - `QuizClientSwing.java`
+   - `Question.java`
+   - `ResultsViewerSwing.java`
+
+#### Bước 2: Biên dịch mã nguồn
+
+1. **Mở terminal** và điều hướng đến thư mục chứa mã nguồn
+2. **Biên dịch các file Java**:
+
+   ```bash
+   javac quiz/*.java
+   ```
+   Hoặc biên dịch từng file riêng lẻ:
+   ```bash
+    javac quiz/QuizServer.java
+    javac quiz/QuizClientSwing.java
+    javac quiz/Question.java
+    javac quiz/ResultsViewerSwing.java
+   ```
+
+3. **Kiểm tra kết quả**: Nếu biên dịch thành công, sẽ tạo ra các file `.class` tương ứng.
+
+#### Bước 3: Chạy ứng dụng
+
+**Khởi động Server:**
+```bash
+java QuizServer.java
+```
+- Server sẽ khởi động trên port mặc định (5555)
+- Console sẽ hiển thị log khi có client kết nối.
+- Server sẽ tạo (nếu chưa có) file results.csv để lưu kết quả làm bài.
+
+**Khởi động Client:**
+```bash
+java QuizClientSwing.java
+```
+- Mỗi client được mở trong một terminal/ứng dụng riêng.
+- Nhập Host, Port và Username trên giao diện Swing.
+- Client kết nối đến server và bắt đầu nhận câu hỏi trắc nghiệm.
+- Sau khi hoàn thành, điểm số và kết quả sẽ được hiển thị ngay trên giao diện.
+- Người dùng có thể chọn 📄 Xem kết quả để mở bảng thống kê kết quả từ file results.csv.
+
+### 🚀 Sử dụng ứng dụng
+
+1. **Kết nối**: Nhập Host, Port và Tên người dùng → bấm Kết nối để tham gia thi.
+2. **Làm bài**: Chọn đáp án cho từng câu hỏi và nhấn Next/Finish.
+3. **Phản hồi**: Sau mỗi câu, giao diện hiển thị kết quả đúng/sai và tiến độ.
+4. **Kết quả cuối cùng**: Khi hoàn thành, client hiển thị điểm số và thống kê.
+5. **Lưu trữ**: Server tự động lưu kết quả vào file results.csv.
+6. **Xem lại**: Người dùng có thể nhấn 📄 Xem kết quả để mở bảng thống kê từ file.
+7. **Ngắt kết nối**: Đóng cửa sổ client hoặc mất mạng sẽ tự động ngắt kết nối.
+
+## 👜Thông tin cá nhân
+**Họ tên**: Nguyễn Hoàng Liêm.  
+**Lớp**: CNTT 16-03.  
+**Email**: liemnguyenhoang22@gmail.com.
+
+© 2025 AIoTLab, Faculty of Information Technology, DaiNam University. All rights reserved.
+
+---
