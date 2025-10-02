@@ -1,37 +1,93 @@
 package tcp;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class QuizUI extends JFrame {
-    private JTable table;
-    private DefaultTableModel model;
-
-    public QuizUI(String username) {
-        setTitle("Xin chào " + username);
-        setSize(500, 300);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
-
-        model = new DefaultTableModel(new Object[]{"ID", "Tên bài kiểm tra", "Hành động"}, 0);
-        table = new JTable(model) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return column == 2;
-            }
-        };
-
-        loadExams();
-
-        table.getColumn("Hành động").setCellRenderer(new ButtonRenderer());
-        table.getColumn("Hành động").setCellEditor(new ButtonEditor(new JCheckBox(), this));
-
-        add(new JScrollPane(table), BorderLayout.CENTER);
-        setVisible(true);
+    private record Exam(int id, String name) {
+        @Override
+        public String toString() {
+            return name;
+        }
     }
 
+    private final String username;
+    private JList<Exam> examList;
+    private DefaultListModel<Exam> listModel;
+    private ModernButton btnDoExam;
+    private ModernButton btnViewHistory;
+
+    public QuizUI(String username) {
+        this.username = username;
+        setTitle("Trắc nghiệm Online - Xin chào " + username);
+        setSize(800, 600);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        JPanel backgroundPanel = new JPanel(new BorderLayout());
+        backgroundPanel.setBackground(Theme.PRIMARY_BACKGROUND);
+        setContentPane(backgroundPanel);
+
+        JLabel lblTitle = new JLabel("Chọn một bài kiểm tra", SwingConstants.CENTER);
+        lblTitle.setFont(Theme.getBoldFont(32f));
+        lblTitle.setForeground(Theme.TEXT_LIGHT);
+        lblTitle.setBorder(new EmptyBorder(20, 0, 20, 0));
+        backgroundPanel.add(lblTitle, BorderLayout.NORTH);
+        
+        RoundedPanel centerPanel = new RoundedPanel(new BorderLayout(10, 10), 20, Theme.PANEL_BACKGROUND);
+        centerPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        backgroundPanel.add(centerPanel, BorderLayout.CENTER);
+
+        listModel = new DefaultListModel<>();
+        examList = new JList<>(listModel);
+        examList.setFont(Theme.getFont(18f));
+        examList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        examList.setFixedCellHeight(50);
+        examList.setCellRenderer(new ExamListRenderer());
+        
+        examList.addListSelectionListener(e -> {
+            boolean isSelected = !examList.isSelectionEmpty();
+            btnDoExam.setEnabled(isSelected);
+            btnViewHistory.setEnabled(isSelected);
+        });
+
+        JScrollPane scrollPane = new JScrollPane(examList);
+        scrollPane.setBorder(BorderFactory.createLineBorder(Theme.BORDER_COLOR));
+        centerPanel.add(scrollPane, BorderLayout.CENTER);
+
+        JPanel actionPanel = new JPanel(new BorderLayout(20, 0));
+        actionPanel.setOpaque(false);
+        actionPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
+
+        JPanel mainActionsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+        mainActionsPanel.setOpaque(false);
+
+        btnDoExam = new ModernButton("Làm bài", Theme.BTN_PRIMARY, Theme.BTN_PRIMARY_HOVER, Theme.BTN_PRIMARY);
+        btnDoExam.setEnabled(false);
+        btnDoExam.addActionListener(e -> openExam());
+        mainActionsPanel.add(btnDoExam);
+
+        btnViewHistory = new ModernButton("Xem lịch sử", Theme.BTN_SECONDARY, Theme.BTN_SECONDARY_HOVER, Theme.BTN_SECONDARY);
+        btnViewHistory.setEnabled(false);
+        btnViewHistory.addActionListener(e -> openHistory());
+        mainActionsPanel.add(btnViewHistory);
+
+        ModernButton btnLogout = new ModernButton("Đăng xuất", Theme.BTN_DANGER, Theme.BTN_DANGER_HOVER, Theme.BTN_DANGER);
+        btnLogout.addActionListener(e -> logout());
+
+        actionPanel.add(mainActionsPanel, BorderLayout.CENTER);
+        actionPanel.add(btnLogout, BorderLayout.WEST);
+
+        centerPanel.add(actionPanel, BorderLayout.SOUTH);
+
+        loadExams();
+        setVisible(true);
+    }
+    
     private void loadExams() {
         try (Connection conn = Server.getConnection()) {
             String sql = "SELECT * FROM exams";
@@ -41,47 +97,54 @@ public class QuizUI extends JFrame {
             while (rs.next()) {
                 int id = rs.getInt("id");
                 String name = rs.getString("exam_name");
-                model.addRow(new Object[]{id, name, "Làm bài"});
+                listModel.addElement(new Exam(id, name));
             }
         } catch (Exception e) {
             e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Lỗi tải danh sách bài thi!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    public void openExam(int examId) {
-        new DoExamUI(examId);
-    }
-}
-
-// ===== Renderer & Editor cho JTable =====
-class ButtonRenderer extends JButton implements javax.swing.table.TableCellRenderer {
-    public ButtonRenderer() { setOpaque(true); }
-    public Component getTableCellRendererComponent(JTable table, Object value,
-                                                   boolean isSelected, boolean hasFocus,
-                                                   int row, int column) {
-        setText((value == null) ? "" : value.toString());
-        return this;
-    }
-}
-
-class ButtonEditor extends DefaultCellEditor {
-    private JButton button;
-    private QuizUI parent;
-    private int examId;
-
-    public ButtonEditor(JCheckBox checkBox, QuizUI parent) {
-        super(checkBox);
-        this.parent = parent;
-        button = new JButton();
-        button.addActionListener(e -> parent.openExam(examId));
+    private void openExam() {
+        Exam selectedExam = examList.getSelectedValue();
+        if (selectedExam != null) {
+            new DoExamUI(selectedExam.id(), username);
+            this.dispose();
+        }
     }
 
-    public Component getTableCellEditorComponent(JTable table, Object value,
-                                                 boolean isSelected, int row, int column) {
-        examId = (int) table.getValueAt(row, 0);
-        button.setText("Làm bài");
-        return button;
+    private void openHistory() {
+        Exam selectedExam = examList.getSelectedValue();
+        if (selectedExam != null) {
+            new HistoryUI(selectedExam.id(), username);
+        }
     }
 
-    public Object getCellEditorValue() { return "Làm bài"; }
+    private void logout() {
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Bạn có chắc chắn muốn đăng xuất không?",
+                "Xác nhận đăng xuất",
+                JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            this.dispose();
+            new Client();
+        }
+    }
+    
+    static class ExamListRenderer extends DefaultListCellRenderer {
+        @Override
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            label.setBorder(new EmptyBorder(5, 15, 5, 15));
+            if (isSelected) {
+                label.setBackground(Theme.PRIMARY_BACKGROUND);
+                label.setForeground(Theme.TEXT_LIGHT);
+            } else {
+                 label.setBackground(index % 2 == 0 ? Color.WHITE : new Color(245, 245, 245));
+                 label.setForeground(Theme.TEXT_DARK);
+            }
+            return label;
+        }
+    }
 }

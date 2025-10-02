@@ -1,160 +1,98 @@
 package tcp;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Enumeration;
 
 class Question {
     int id;
     String question;
     String[] options = new String[4];
-    int correct; // 1-4
+    int correctOption;
 }
 
 public class DoExamUI extends JFrame {
-    private ArrayList<Question> questions = new ArrayList<>();
-    private ArrayList<JPanel> questionPanels = new ArrayList<>();
-    private ArrayList<ButtonGroup> answerGroups = new ArrayList<>();
-    private ArrayList<JButton> questionButtons = new ArrayList<>();
-    private JPanel questionsPanel;
-    private JLabel scoreLabel = new JLabel("", SwingConstants.CENTER);
-    private JButton submitBtn;
+    private final int examId;
+    private final String username;
 
-    public DoExamUI(int examId) {
-        setTitle("Làm bài kiểm tra #" + examId);
-        setSize(1000, 700);
+    private final ArrayList<Question> questions = new ArrayList<>();
+    private final int[] userAnswers;
+
+    private final JPanel mainQuestionsPanel;
+    private final ArrayList<JPanel> questionPanelList = new ArrayList<>();
+    private final ArrayList<ModernButton[]> answerButtonsList = new ArrayList<>();
+    private final ArrayList<CircleButton> questionButtons = new ArrayList<>();
+
+    private final JLabel scoreLabel;
+    private final ModernButton submitBtn;
+
+    public DoExamUI(int examId, String username) {
+        this.examId = examId;
+        this.username = username;
+
+        setTitle("Làm bài kiểm tra");
+        setSize(1100, 750);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        loadQuestions(examId);
+        loadQuestions();
+        this.userAnswers = new int[questions.size()];
 
-        // Sidebar tròn bên trái
-        JPanel sidebar = new JPanel();
-        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
-        sidebar.setBackground(new Color(230, 230, 230));
-        sidebar.setPreferredSize(new Dimension(80, 0));
-
-        // Panel chứa câu hỏi
-        questionsPanel = new JPanel();
-        questionsPanel.setLayout(new BoxLayout(questionsPanel, BoxLayout.Y_AXIS));
-        questionsPanel.setBackground(Color.GRAY);
-
-        JScrollPane scrollPane = new JScrollPane(questionsPanel);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
-        // Panel chính chứa score + scroll câu hỏi
         JPanel mainPanel = new JPanel(new BorderLayout());
-        scoreLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
-        scoreLabel.setForeground(new Color(34, 167, 240));
-        scoreLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-        mainPanel.add(scoreLabel, BorderLayout.NORTH);
+        mainPanel.setBackground(Theme.PRIMARY_BACKGROUND);
+        setContentPane(mainPanel);
+
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setOpaque(false);
+        headerPanel.setBorder(new EmptyBorder(15, 20, 15, 20));
+        JLabel examTitle = new JLabel("Bài kiểm tra #" + examId, SwingConstants.LEFT);
+        examTitle.setFont(Theme.getBoldFont(24f));
+        examTitle.setForeground(Theme.TEXT_LIGHT);
+        headerPanel.add(examTitle, BorderLayout.WEST);
+        scoreLabel = new JLabel("", SwingConstants.RIGHT);
+        scoreLabel.setFont(Theme.getBoldFont(24f));
+        scoreLabel.setForeground(Theme.BTN_SECONDARY);
+        headerPanel.add(scoreLabel, BorderLayout.EAST);
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+
+        JPanel sidebar = new JPanel();
+        sidebar.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        sidebar.setBackground(Theme.SECONDARY_BACKGROUND);
+        sidebar.setPreferredSize(new Dimension(120, 0));
+        mainPanel.add(new JScrollPane(sidebar), BorderLayout.WEST);
+
+        mainQuestionsPanel = new JPanel();
+        mainQuestionsPanel.setLayout(new BoxLayout(mainQuestionsPanel, BoxLayout.Y_AXIS));
+        mainQuestionsPanel.setBackground(Color.DARK_GRAY);
+
+        JScrollPane scrollPane = new JScrollPane(mainQuestionsPanel);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
-        add(mainPanel, BorderLayout.CENTER);
 
-        // Tạo UI cho từng câu hỏi
-        for (int i = 0; i < questions.size(); i++) {
-            int qIndex = i;
-            Question q = questions.get(i);
+        buildQuestionPanels(sidebar);
 
-            JPanel qBox = new JPanel();
-            qBox.setLayout(new BoxLayout(qBox, BoxLayout.Y_AXIS));
-            qBox.setBackground(Color.WHITE);
-            qBox.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-            qBox.setAlignmentX(Component.CENTER_ALIGNMENT);
-            qBox.setMaximumSize(new Dimension(600, 200));
-            qBox.setPreferredSize(new Dimension(600, 200));
-
-            JLabel qLabel = new JLabel("Câu " + (i + 1) + ": " + q.question);
-            qLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            qLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
-            qBox.add(qLabel);
-
-            ButtonGroup group = new ButtonGroup();
-            for (int j = 0; j < 4; j++) {
-                JRadioButton option = new JRadioButton(q.options[j]);
-                option.setAlignmentX(Component.LEFT_ALIGNMENT);
-                option.setFont(new Font("SansSerif", Font.PLAIN, 13));
-                option.setOpaque(true);
-                option.setBackground(Color.WHITE);
-                group.add(option);
-                qBox.add(option);
-
-                option.addActionListener(e -> questionButtons.get(qIndex).setBackground(new Color(173, 216, 230)));
-            }
-
-            answerGroups.add(group);
-            questionsPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-            questionsPanel.add(qBox);
-            questionPanels.add(qBox);
-
-            // Nút sidebar tròn
-            JButton circleBtn = new JButton(String.valueOf(i + 1)) {
-                @Override
-                protected void paintComponent(Graphics g) {
-                    g.setColor(getBackground());
-                    g.fillOval(0, 0, getWidth(), getHeight());
-                    g.setColor(getForeground());
-                    FontMetrics fm = g.getFontMetrics();
-                    int textWidth = fm.stringWidth(getText());
-                    int textHeight = fm.getAscent();
-                    g.drawString(getText(), (getWidth() - textWidth) / 2,
-                            (getHeight() + textHeight) / 2 - 2);
-                }
-
-                @Override
-                protected void paintBorder(Graphics g) {
-                    g.setColor(Color.LIGHT_GRAY);
-                    g.drawOval(0, 0, getWidth() - 1, getHeight() - 1);
-                }
-            };
-            circleBtn.setFocusPainted(false);
-            circleBtn.setContentAreaFilled(false);
-            circleBtn.setBorderPainted(false);
-            circleBtn.setOpaque(false);
-            circleBtn.setForeground(Color.BLACK);
-            circleBtn.setBackground(Color.WHITE);
-            circleBtn.setPreferredSize(new Dimension(40, 40));
-            circleBtn.setMaximumSize(new Dimension(40, 40));
-            circleBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-            circleBtn.addActionListener(e -> {
-                Rectangle rect = questionPanels.get(qIndex).getBounds();
-                questionsPanel.scrollRectToVisible(rect);
-            });
-
-            questionButtons.add(circleBtn);
-            sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
-            sidebar.add(circleBtn);
-        }
-
-        // Nút nộp bài
-        JPanel bottomPanel = new JPanel();
-        bottomPanel.setBackground(Color.WHITE);
-        submitBtn = new JButton("Nộp bài");
-        submitBtn.setFont(new Font("SansSerif", Font.BOLD, 16));
-        submitBtn.setBackground(new Color(34, 167, 240));
-        submitBtn.setForeground(Color.WHITE);
-        submitBtn.setFocusPainted(false);
-        submitBtn.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        bottomPanel.setOpaque(false);
+        bottomPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        submitBtn = new ModernButton("Nộp bài", Theme.BTN_PRIMARY, Theme.BTN_PRIMARY_HOVER, Theme.BTN_PRIMARY);
         submitBtn.addActionListener(e -> submitExam());
         bottomPanel.add(submitBtn);
-
-        add(bottomPanel, BorderLayout.SOUTH);
-        add(sidebar, BorderLayout.WEST);
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         setVisible(true);
     }
 
-    private void loadQuestions(int examId) {
+    private void loadQuestions() {
         try (Connection conn = Server.getConnection()) {
             String sql = "SELECT * FROM questions WHERE exam_id=?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, examId);
             ResultSet rs = stmt.executeQuery();
-
             while (rs.next()) {
                 Question q = new Question();
                 q.id = rs.getInt("id");
@@ -163,7 +101,7 @@ public class DoExamUI extends JFrame {
                 q.options[1] = rs.getString("option_b");
                 q.options[2] = rs.getString("option_c");
                 q.options[3] = rs.getString("option_d");
-                q.correct = rs.getInt("correct_option"); // 1-4
+                q.correctOption = rs.getInt("correct_option");
                 questions.add(q);
             }
         } catch (Exception e) {
@@ -171,64 +109,146 @@ public class DoExamUI extends JFrame {
         }
     }
 
+    private void buildQuestionPanels(JPanel sidebar) {
+        for (int i = 0; i < questions.size(); i++) {
+            Question q = questions.get(i);
+
+            RoundedPanel questionCard = new RoundedPanel(new BorderLayout(10, 20), 20, Theme.PANEL_BACKGROUND);
+            questionCard.setBorder(new EmptyBorder(40, 40, 40, 40));
+            questionCard.setMaximumSize(new Dimension(Integer.MAX_VALUE, 350));
+
+            JLabel qLabel = new JLabel(String.format("<html><body style='width: 550px;'>Câu %d: %s</body></html>", i + 1, q.question));
+            qLabel.setFont(Theme.getBoldFont(22f));
+            qLabel.setForeground(Theme.TEXT_DARK);
+            questionCard.add(qLabel, BorderLayout.NORTH);
+
+            JPanel answersPanel = new JPanel(new GridLayout(2, 2, 20, 20));
+            answersPanel.setOpaque(false);
+            ModernButton[] answerButtons = new ModernButton[4];
+
+            for (int j = 0; j < 4; j++) {
+                answerButtons[j] = new ModernButton("<html>" + q.options[j] + "</html>", Theme.PRIMARY_BACKGROUND, Theme.SECONDARY_BACKGROUND, Theme.BTN_SECONDARY);
+                answerButtons[j].setFont(Theme.getFont(16f));
+                final int questionIndex = i;
+                final int optionIndex = j + 1;
+                answerButtons[j].addActionListener(e -> selectAnswer(questionIndex, optionIndex));
+                answersPanel.add(answerButtons[j]);
+            }
+            answerButtonsList.add(answerButtons);
+            questionCard.add(answersPanel, BorderLayout.CENTER);
+
+            mainQuestionsPanel.add(questionCard);
+            mainQuestionsPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+            questionPanelList.add(questionCard);
+
+            CircleButton circleBtn = new CircleButton(String.valueOf(i + 1));
+            final int indexToScroll = i;
+            circleBtn.addActionListener(e -> {
+                Rectangle rect = questionPanelList.get(indexToScroll).getBounds();
+                mainQuestionsPanel.scrollRectToVisible(rect);
+            });
+            sidebar.add(circleBtn);
+            questionButtons.add(circleBtn);
+        }
+    }
+
+    private void selectAnswer(int questionIndex, int optionIndex) {
+        userAnswers[questionIndex] = optionIndex;
+
+        ModernButton[] buttons = answerButtonsList.get(questionIndex);
+        for (int i = 0; i < buttons.length; i++) {
+            buttons[i].setSelected((i + 1) == optionIndex);
+        }
+
+        questionButtons.get(questionIndex).setAnswered(true);
+    }
+
     private void submitExam() {
-        // Kiểm tra câu chưa trả lời
-        for (int i = 0; i < answerGroups.size(); i++) {
-            if (answerGroups.get(i).getSelection() == null) {
-                JOptionPane.showMessageDialog(this,
-                        "Câu " + (i + 1) + " chưa trả lời.",
-                        "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+        for (int i = 0; i < userAnswers.length; i++) {
+            if (userAnswers[i] == 0) {
+                JOptionPane.showMessageDialog(this, "Bạn chưa trả lời câu " + (i + 1) + "!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+                Rectangle rect = questionPanelList.get(i).getBounds();
+                mainQuestionsPanel.scrollRectToVisible(rect);
                 return;
             }
         }
 
-        int score = 0;
+        int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn nộp bài không?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+        if (confirm != JOptionPane.YES_OPTION) return;
 
-        // Hiển thị đáp án đúng/sai
+        int score = 0;
         for (int i = 0; i < questions.size(); i++) {
-            Question q = questions.get(i);
-            ButtonGroup group = answerGroups.get(i);
-            Enumeration<AbstractButton> buttons = group.getElements();
-            int idx = 0;
-            while (buttons.hasMoreElements()) {
-                JRadioButton btn = (JRadioButton) buttons.nextElement();
-                if (idx + 1 == q.correct) {
-                    btn.setBackground(new Color(144, 238, 144)); // xanh nhạt = đúng
-                }
-                if (btn.isSelected() && (idx + 1 != q.correct)) {
-                    btn.setBackground(new Color(255, 182, 193)); // đỏ nhạt = sai
-                }
-                btn.setForeground(Color.BLACK); // chữ màu đen
-                idx++;
+            if (userAnswers[i] == questions.get(i).correctOption) {
+                score++;
             }
-        
-            // Tính điểm
-            buttons = group.getElements();
-            idx = 0;
-            while (buttons.hasMoreElements()) {
-                JRadioButton btn = (JRadioButton) buttons.nextElement();
-                if (btn.isSelected() && (idx + 1 == q.correct)) score++;
-                idx++;
+
+            ModernButton[] buttons = answerButtonsList.get(i);
+            for (int j = 0; j < buttons.length; j++) {
+                int currentOption = j + 1;
+                buttons[j].setInteractionsEnabled(false);
+                if (currentOption == questions.get(i).correctOption) {
+                    buttons[j].setBackground(Theme.BTN_PRIMARY);
+                } else if (currentOption == userAnswers[i]) {
+                    buttons[j].setBackground(Theme.BTN_DANGER);
+                } else {
+                    buttons[j].setBackground(Theme.PRIMARY_BACKGROUND);
+                }
+                buttons[j].setEnabled(false);
             }
         }
-
-        // Hiển thị điểm
         scoreLabel.setText("Điểm: " + score + " / " + questions.size());
 
-        // Khóa tất cả đáp án
-        for (ButtonGroup group : answerGroups) {
-            Enumeration<AbstractButton> buttons = group.getElements();
-            while (buttons.hasMoreElements()) buttons.nextElement().setEnabled(false);
+        try (Connection conn = Server.getConnection()) {
+            String sql = "INSERT INTO exam_history (username, exam_id, score, total_questions, taken_at) VALUES (?, ?, ?, ?, ?)";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, username);
+            stmt.setInt(2, examId);
+            stmt.setInt(3, score);
+            stmt.setInt(4, questions.size());
+            stmt.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+            stmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        // Đổi nút nộp thành "Quay lại"
         submitBtn.setText("Quay lại");
-        submitBtn.removeActionListener(submitBtn.getActionListeners()[0]); // bỏ action cũ
-        submitBtn.setEnabled(true); // mở lại nút
-        submitBtn.addActionListener(e -> dispose()); // bấm đóng cửa sổ
+        submitBtn.removeActionListener(submitBtn.getActionListeners()[0]);
+        submitBtn.addActionListener(e -> {
+            new QuizUI(username);
+            dispose();
+        });
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new DoExamUI(1));
+    private static class CircleButton extends JButton {
+        private boolean answered = false;
+        public CircleButton(String text) {
+            super(text);
+            setFont(Theme.getBoldFont(16f));
+            setForeground(Theme.TEXT_DARK);
+            setContentAreaFilled(false);
+            setBorderPainted(false);
+            setFocusPainted(false);
+            setPreferredSize(new Dimension(50, 50));
+            setCursor(new Cursor(Cursor.HAND_CURSOR));
+        }
+        public void setAnswered(boolean answered) {
+            this.answered = answered;
+            repaint();
+        }
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            if (answered) {
+                g2.setColor(Theme.BTN_SECONDARY);
+            } else {
+                g2.setColor(Color.WHITE);
+            }
+            g2.fillOval(0, 0, getWidth(), getHeight());
+            g2.setColor(Theme.BORDER_COLOR);
+            g2.drawOval(0, 0, getWidth() - 1, getHeight() - 1);
+            g2.dispose();
+            super.paintComponent(g);
+        }
     }
 }
